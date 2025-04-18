@@ -1,12 +1,15 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Patch,
   Param,
+  Get,
   Delete,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { CourseService } from './course.service';
 import { CreateCourseDto, UpdateCourseDto } from './dto/course.dto';
 
@@ -15,8 +18,12 @@ export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @Post('add')
-  createCourse(@Body() createCourseDto: CreateCourseDto) {
-    return this.courseService.createCourse(createCourseDto);
+  @UseInterceptors(FileInterceptor('image'))
+  createCourse(
+    @UploadedFile() image: Express.Multer.File,
+    @Body() createCourseDto: CreateCourseDto,
+  ) {
+    return this.courseService.createCourse(createCourseDto, image);
   }
 
   @Get('viewAll')
@@ -29,12 +36,14 @@ export class CourseController {
     return this.courseService.getCourseById(id);
   }
 
-  @Patch('/update/:id')
+  @Patch('update/:id')
+  @UseInterceptors(FileInterceptor('image'))
   updateCourse(
     @Param('id') id: string,
+    @UploadedFile() image: Express.Multer.File,
     @Body() updateCourseDto: UpdateCourseDto,
   ) {
-    return this.courseService.updateCourse(id, updateCourseDto);
+    return this.courseService.updateCourse(id, updateCourseDto, image);
   }
 
   @Delete('/delete/:id')

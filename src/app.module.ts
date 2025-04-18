@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
@@ -11,7 +13,19 @@ import { ChapterModule } from './chapter/chapter.module';
 import { QuestionModule } from './question/question.module';
 
 @Module({
-  imports: [DatabaseModule, UserModule, CategoryModule, AuthModule, PricingModule, CourseModule, ChapterModule, QuestionModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // Makes env variables available throughout the app
+    }),
+    DatabaseModule,
+    UserModule,
+    CategoryModule,
+    AuthModule,
+    PricingModule,
+    CourseModule,
+    ChapterModule,
+    QuestionModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

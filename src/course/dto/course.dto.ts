@@ -56,7 +56,8 @@ export class CreateCourseDto {
 
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440003' })
   @IsUUID('4')
-  @IsNotEmpty()
+  @IsOptional()
+  @IsString()
   teacherId: string;
 }
 
