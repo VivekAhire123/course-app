@@ -45,7 +45,8 @@ export class CreateCourseDto {
   pricingId?: string;
 
   @IsUUID('4')
-  @IsNotEmpty()
+  @IsOptional()
+  @IsString()
   teacherId: string;
 }
 

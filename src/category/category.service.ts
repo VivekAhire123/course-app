@@ -46,12 +46,12 @@ export class CategoryService {
       return new ResponseSuccess(
         categories,
         ResponseMessages.category.categories_retrieved,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -71,18 +71,18 @@ export class CategoryService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.category.category_not_found,
-        ).getResponse();
+        );
       }
 
       return new ResponseSuccess(
         category,
         ResponseMessages.category.category_fetched,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -96,7 +96,7 @@ export class CategoryService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.category.category_not_found,
-        ).getResponse();
+        );
       }
 
       const updatedCategory = await this.databaseService.category.update({
@@ -115,12 +115,12 @@ export class CategoryService {
       return new ResponseSuccess(
         updatedCategory,
         ResponseMessages.category.category_updated,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -134,7 +134,7 @@ export class CategoryService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.category.category_not_found,
-        ).getResponse();
+        );
       }
 
       await this.databaseService.category.delete({
@@ -144,12 +144,12 @@ export class CategoryService {
       return new ResponseSuccess(
         null,
         ResponseMessages.category.category_deleted,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -165,7 +165,7 @@ export class CategoryService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.category.category_not_found,
-        ).getResponse();
+        );
       }
 
       const subCategory = await this.databaseService.subcategory.create({
@@ -178,12 +178,12 @@ export class CategoryService {
       return new ResponseSuccess(
         subCategory,
         ResponseMessages.subcategory.subcategory_created,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -202,12 +202,12 @@ export class CategoryService {
       return new ResponseSuccess(
         subCategories,
         ResponseMessages.subcategory.subcategories_retrieved,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -228,18 +228,18 @@ export class CategoryService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.subcategory.subcategory_not_found,
-        ).getResponse();
+        );
       }
 
       return new ResponseSuccess(
         subCategory,
         ResponseMessages.subcategory.subcategory_fetched,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -258,7 +258,7 @@ export class CategoryService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.subcategory.subcategory_not_found,
-        ).getResponse();
+        );
       }
 
       const category = await this.databaseService.category.findUnique({
@@ -269,7 +269,7 @@ export class CategoryService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.category.category_not_found,
-        ).getResponse();
+        );
       }
 
       const updatedSubCategory = await this.databaseService.subcategory.update({
@@ -290,12 +290,12 @@ export class CategoryService {
       return new ResponseSuccess(
         updatedSubCategory,
         ResponseMessages.subcategory.subcategory_updated,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -309,7 +309,7 @@ export class CategoryService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.subcategory.subcategory_not_found,
-        ).getResponse();
+        );
       }
 
       await this.databaseService.subcategory.delete({
@@ -319,12 +319,12 @@ export class CategoryService {
       return new ResponseSuccess(
         null,
         ResponseMessages.subcategory.subcategory_deleted,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 }

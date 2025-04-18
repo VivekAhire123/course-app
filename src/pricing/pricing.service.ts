@@ -21,7 +21,7 @@ export class PricingService {
           return new ResponseError(
             { name: 'notFound' },
             ResponseMessages.course.course_not_found,
-          ).getResponse();
+          );
         }
       }
 
@@ -37,12 +37,12 @@ export class PricingService {
       return new ResponseSuccess(
         pricing,
         ResponseMessages.pricing.pricing_created,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -62,12 +62,12 @@ export class PricingService {
       return new ResponseSuccess(
         pricings,
         ResponseMessages.pricing.pricings_retrieved,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -89,18 +89,18 @@ export class PricingService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.pricing.pricing_not_found,
-        ).getResponse();
+        );
       }
 
       return new ResponseSuccess(
         pricing,
         ResponseMessages.pricing.pricing_fetched,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -116,7 +116,7 @@ export class PricingService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.pricing.pricing_not_found,
-        ).getResponse();
+        );
       }
 
       if (courseId) {
@@ -128,7 +128,7 @@ export class PricingService {
           return new ResponseError(
             { name: 'notFound' },
             ResponseMessages.course.course_not_found,
-          ).getResponse();
+          );
         }
       }
 
@@ -153,12 +153,12 @@ export class PricingService {
       return new ResponseSuccess(
         updatedPricing,
         ResponseMessages.pricing.pricing_updated,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -172,7 +172,7 @@ export class PricingService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.pricing.pricing_not_found,
-        ).getResponse();
+        );
       }
 
       await this.databaseService.pricing.delete({
@@ -182,7 +182,7 @@ export class PricingService {
       return new ResponseSuccess(
         null,
         ResponseMessages.pricing.pricing_deleted,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },

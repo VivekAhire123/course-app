@@ -3,12 +3,19 @@ import { DatabaseService } from '../database/database.service';
 import { CreateCourseDto, UpdateCourseDto } from './dto/course.dto';
 import { ResponseMessages } from '../common/response-messages';
 import { ResponseError, ResponseSuccess } from 'src/common/dto/response.dto';
+import { S3Service } from 'src/common/s3/s3.service';
 
 @Injectable()
 export class CourseService {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly s3Service: S3Service,
+  ) {}
 
-  async createCourse(createCourseDto: CreateCourseDto) {
+  async createCourse(
+    createCourseDto: CreateCourseDto,
+    image?: Express.Multer.File,
+  ) {
     try {
       const {
         name,
@@ -18,12 +25,11 @@ export class CourseService {
         level,
         categoryId,
         subcategoryId,
-        imageUrl,
+        imageUrl: imageUrlDto,
         pricingId,
         teacherId,
       } = createCourseDto;
 
-      // Validate category
       const category = await this.databaseService.category.findUnique({
         where: { id: categoryId },
       });
@@ -31,10 +37,9 @@ export class CourseService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.category.category_not_found,
-        ).getResponse();
+        );
       }
 
-      // Validate subcategory if provided
       if (subcategoryId) {
         const subcategory = await this.databaseService.subcategory.findUnique({
           where: { id: subcategoryId },
@@ -43,11 +48,10 @@ export class CourseService {
           return new ResponseError(
             { name: 'notFound' },
             ResponseMessages.subcategory.subcategory_not_found,
-          ).getResponse();
+          );
         }
       }
 
-      // Validate pricing if provided
       if (pricingId) {
         const pricing = await this.databaseService.pricing.findUnique({
           where: { id: pricingId },
@@ -56,9 +60,9 @@ export class CourseService {
           return new ResponseError(
             { name: 'notFound' },
             ResponseMessages.pricing.pricing_not_found,
-          ).getResponse();
+          );
         }
-        // Check if pricing is already assigned to another course
+
         const existingCourseWithPricing =
           await this.databaseService.course.findFirst({
             where: { pricingId },
@@ -67,11 +71,10 @@ export class CourseService {
           return new ResponseError(
             { name: 'badRequest' },
             'Pricing is already assigned to another course.',
-          ).getResponse();
+          );
         }
       }
 
-      // Validate teacher
       const teacher = await this.databaseService.user.findUnique({
         where: { id: teacherId },
       });
@@ -79,7 +82,13 @@ export class CourseService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.user.user_not_found,
-        ).getResponse();
+        );
+      }
+
+      let finalImageUrl = imageUrlDto;
+      if (image) {
+        const s3Key = await this.s3Service.uploadImage(image);
+        finalImageUrl = s3Key;
       }
 
       const course = await this.databaseService.course.create({
@@ -93,7 +102,7 @@ export class CourseService {
           subcategory: subcategoryId
             ? { connect: { id: subcategoryId } }
             : undefined,
-          imageUrl,
+          imageUrl: finalImageUrl,
           pricing: pricingId ? { connect: { id: pricingId } } : undefined,
           teacher: { connect: { id: teacherId } },
         },
@@ -102,12 +111,13 @@ export class CourseService {
       return new ResponseSuccess(
         course,
         ResponseMessages.course.course_created,
-      ).getResponse();
+      );
     } catch (error) {
+      console.log('Error adding course:', error);
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -131,15 +141,28 @@ export class CourseService {
         },
       });
 
+      const coursesWithSignedUrls = await Promise.all(
+        courses.map(async (course) => {
+          const signedUrl = course.imageUrl
+            ? await this.s3Service.getSignedUrl(course.imageUrl)
+            : null;
+
+          return {
+            ...course,
+            imageUrl: signedUrl,
+          };
+        }),
+      );
+
       return new ResponseSuccess(
-        courses,
+        coursesWithSignedUrls,
         ResponseMessages.course.courses_retrieved,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -168,22 +191,33 @@ export class CourseService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.course.course_not_found,
-        ).getResponse();
+        );
       }
 
+      const signedUrl = course.imageUrl
+        ? await this.s3Service.getSignedUrl(course.imageUrl)
+        : null;
+
       return new ResponseSuccess(
-        course,
+        {
+          ...course,
+          imageUrl: signedUrl,
+        },
         ResponseMessages.course.course_fetched,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
-  async updateCourse(id: string, updateCourseDto: UpdateCourseDto) {
+  async updateCourse(
+    id: string,
+    updateCourseDto: UpdateCourseDto,
+    image?: Express.Multer.File,
+  ) {
     try {
       const {
         name,
@@ -193,7 +227,7 @@ export class CourseService {
         level,
         categoryId,
         subcategoryId,
-        imageUrl,
+        imageUrl: imageUrlDto,
         pricingId,
         teacherId,
       } = updateCourseDto;
@@ -206,10 +240,10 @@ export class CourseService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.course.course_not_found,
-        ).getResponse();
+        );
       }
 
-      // Validate category if provided
+      // Validate category
       if (categoryId) {
         const category = await this.databaseService.category.findUnique({
           where: { id: categoryId },
@@ -218,11 +252,11 @@ export class CourseService {
           return new ResponseError(
             { name: 'notFound' },
             ResponseMessages.category.category_not_found,
-          ).getResponse();
+          );
         }
       }
 
-      // Validate subcategory if provided
+      // Validate subcategory
       if (subcategoryId) {
         const subcategory = await this.databaseService.subcategory.findUnique({
           where: { id: subcategoryId },
@@ -231,11 +265,11 @@ export class CourseService {
           return new ResponseError(
             { name: 'notFound' },
             ResponseMessages.subcategory.subcategory_not_found,
-          ).getResponse();
+          );
         }
       }
 
-      // Validate pricing if provided
+      // Validate pricing
       if (pricingId) {
         const pricing = await this.databaseService.pricing.findUnique({
           where: { id: pricingId },
@@ -244,9 +278,9 @@ export class CourseService {
           return new ResponseError(
             { name: 'notFound' },
             ResponseMessages.pricing.pricing_not_found,
-          ).getResponse();
+          );
         }
-        // Check if pricing is assigned to another course
+
         const existingCourseWithPricing =
           await this.databaseService.course.findFirst({
             where: { pricingId, NOT: { id } },
@@ -255,11 +289,11 @@ export class CourseService {
           return new ResponseError(
             { name: 'badRequest' },
             'Pricing is already assigned to another course.',
-          ).getResponse();
+          );
         }
       }
 
-      // Validate teacher if provided
+      // Validate teacher
       if (teacherId) {
         const teacher = await this.databaseService.user.findUnique({
           where: { id: teacherId },
@@ -268,8 +302,15 @@ export class CourseService {
           return new ResponseError(
             { name: 'notFound' },
             ResponseMessages.user.user_not_found,
-          ).getResponse();
+          );
         }
+      }
+
+      // Upload image if provided
+      let finalImageUrl = imageUrlDto ?? course.imageUrl;
+      if (image) {
+        const s3Key = await this.s3Service.uploadImage(image);
+        finalImageUrl = s3Key;
       }
 
       const updatedCourse = await this.databaseService.course.update({
@@ -284,7 +325,7 @@ export class CourseService {
           subcategory: subcategoryId
             ? { connect: { id: subcategoryId } }
             : undefined,
-          imageUrl: imageUrl ?? course.imageUrl,
+          imageUrl: finalImageUrl,
           pricing: pricingId ? { connect: { id: pricingId } } : undefined,
           teacher: teacherId ? { connect: { id: teacherId } } : undefined,
         },
@@ -308,12 +349,12 @@ export class CourseService {
       return new ResponseSuccess(
         updatedCourse,
         ResponseMessages.course.course_updated,
-      ).getResponse();
+      );
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 
@@ -327,22 +368,19 @@ export class CourseService {
         return new ResponseError(
           { name: 'notFound' },
           ResponseMessages.course.course_not_found,
-        ).getResponse();
+        );
       }
 
       await this.databaseService.course.delete({
         where: { id },
       });
 
-      return new ResponseSuccess(
-        null,
-        ResponseMessages.course.course_deleted,
-      ).getResponse();
+      return new ResponseSuccess(null, ResponseMessages.course.course_deleted);
     } catch (error) {
       return new ResponseError(
         { name: 'internalServerError' },
         ResponseMessages.common.internal_server_error,
-      ).getResponse();
+      );
     }
   }
 }
