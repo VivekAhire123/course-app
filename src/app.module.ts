@@ -7,9 +7,10 @@ import { CategoryModule } from './category/category.module';
 import { AuthModule } from './auth/auth.module';
 import { PricingModule } from './pricing/pricing.module';
 import { CourseModule } from './course/course.module';
+import { ChapterModule } from './chapter/chapter.module';
 
 @Module({
-  imports: [DatabaseModule, UserModule, CategoryModule, AuthModule, PricingModule, CourseModule],
+  imports: [DatabaseModule, UserModule, CategoryModule, AuthModule, PricingModule, CourseModule, ChapterModule],
   controllers: [AppController],
   providers: [AppService],
 })

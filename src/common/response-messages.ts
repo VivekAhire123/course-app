@@ -66,4 +66,12 @@ export const ResponseMessages = {
     pricing_deleted: 'Pricing deleted successfully.',
     pricing_not_found: 'Pricing not found.',
   },
+  chapter: {
+    chapter_not_found: 'Chapter not found.',
+    chapter_created: 'Chapter created successfully.',
+    chapter_retrieved: 'Chapters retrieved successfully.',
+    chapter_fetched: 'Chapter retrieved successfully.',
+    chapter_updated: 'Chapter updated successfully.',
+    chapter_deleted: 'Chapter deleted successfully.',
+  },
 };
